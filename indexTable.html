@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang = "en">
+    <head>
+        <meta charset = "UTF-8">
+        <title>Supply Chain Costs</title>
+        <script src ="https://d3js.org/d3.v7.min.js"></script>
+        <style>
+            body {
+                text-align: center; 
+                margin: auto;
+            }
+            h4 {
+                font-size: small;
+            }
+            table {
+                border-collapse: collapse;
+                border-spacing: 0;
+                margin: auto;
+                font-size: 12pt;
+            }
+            th, td {
+                padding: 10px;
+                border: 1px solid #000;
+            }
+            th {
+                background-color: lightblue;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>
+            Supply Chain Costs
+        </h1>
+        <div id = 'container'></div>
+
+        <script>
+        	// Creating a function to extract data from csv file
+        	const data_from_csv = d3.csv("https://raw.githubusercontent.com/amysfrogs/Week-5-Part-2/main/Exercise/data_sample.csv",
+                function(d) {
+                    return{
+                        date: new Date (d.date).toISOString().split("T")[0],
+                        EstimatedCost: new Number(d.EstimatedCost),
+                        RawMaterial: new Number(d.RawMaterial), 
+                        Workmanship: new Number(d.Workmanship), 
+                        YearlyStorage: new Number(d.YearlyStorage),
+                        ActualCost: new Number(Math.round(new Number(d.RawMaterial) + new Number(d.Workmanship) + new Number(d.YearlyStorage / 12))),
+                        SoldPrice: new Number(Math.round((d.EstimatedCost) * 1.1)),
+                        MarginOfProfit: new Number(Math.round((new Number(d.EstimatedCost) * 1.1 ) - new Number(new Number((new Number(d.RawMaterial) + new Number(d.Workmanship) + new Number(new Number(d.YearlyStorage) / 12))))))}
+                })
+            // Defining all the columns
+            var columns_in_csv = ['date', 'EstimatedCost', 'RawMaterial', 'Workmanship', 'YearlyStorage', 'ActualCost', 'SoldPrice', 'MarginOfProfit']
+
+			// Calling the function to get data from csv
+            data_from_csv.then(data => {
+                creating_table(data, columns_in_csv)
+                })
+            
+            var creating_table =function(data, columns) {
+                var table = d3.select(container).append("table").style("border","black")
+                    var thead = table.append('thead').style("border","black")
+                    var tbody = table.append('tbody').style("border","black");
+
+                    thead.append('tr')
+                        .selectAll('th')
+                        .data(columns)
+                        .enter()
+                        .append('th')
+                        .text(function(d) {return d})
+
+                    var rows = tbody.selectAll('tr')
+                        .data(data)
+                        .enter()
+                        .append('tr')
+
+                    var cells = rows.selectAll('td')
+                        .data(function(row) {
+                            return columns.map(function (column) {
+                                return {column: column, value: row[column]}
+                            })
+                        })
+                        .enter()
+                        .append('td')
+                        .text(function (d) {return d.value})
+
+                    return table;
+            }
+
+        </script>
+    </body>
+</html>
